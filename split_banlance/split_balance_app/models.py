@@ -1,75 +1,59 @@
 from django.db import models
-
-
-class CreateUpdate(models.Model):
-    created_at = models.DateTimeField(auto_now=True)
-    created_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        abstract = True
+from django.db.models import JSONField
 
 
 class User(models.Model):
-    user_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     mobile_number = models.CharField(max_length=15)
 
     def __str__(self):
-        return self.name
+        return self.email
 
 
-class Room(models.Model):
-    name = models.CharField(max_length=255)
-
-    def __str__(self):
-        return self.name
-
-
-class UserRoom(models.Model):
-    room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.room.name
-
-
-class Expense(CreateUpdate):
-    EXPENSE_TYPE_CHOICES = (
+class Expense(models.Model):
+    EXPENSE_TYPE_CHOICES = [
         ("EQUAL", "Equal"),
         ("EXACT", "Exact"),
         ("PERCENT", "Percent"),
-    )
-    room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    paid_by = models.ForeignKey(User, on_delete=models.CASCADE)
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    expense_type = models.CharField(
-        max_length=10,
-        choices=EXPENSE_TYPE_CHOICES
-        )
+    ]
+
+    paid_by = models.ForeignKey(User,
+                                on_delete=models.CASCADE,
+                                related_name="paid_by")
+    description = models.CharField(max_length=255)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    expense_type = models.CharField(max_length=10,
+                                    choices=EXPENSE_TYPE_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
+    shares = JSONField(blank=True, null=True)
+    owed_to_user = models.ManyToManyField(User, blank=True)
 
     def __str__(self):
-        return self.created_by.name
+        return self.description
 
 
-class ExpenseSplit(CreateUpdate):
+class ExpenseShare(models.Model):
     expense = models.ForeignKey(
-        Expense, on_delete=models.CASCADE, related_name="expense_splits"
+        Expense, on_delete=models.CASCADE, related_name="expense"
     )
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="user_splits")
+    payer = models.ForeignKey(User,
+                              on_delete=models.CASCADE,
+                              related_name="payer")
+    owed_to = models.ForeignKey(User,
+                                on_delete=models.CASCADE,
+                                related_name="owed_to")
     amount = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return self.user.name
+        return f"{self.payer} owes {self.amount} to {self.owed_to}"
 
 
-class Owes(CreateUpdate):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    owes_to = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="owes_to")
+class SimplfyAmount(models.Model):
+    payer = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="payer_on_behalf"
+    )
+    on_behalf_of = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="on_behalf_of"
+    )
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-
-    def __str__(self):
-        return f"{self.user.name} owes {self.amount} to {self.owes_to.name} "
