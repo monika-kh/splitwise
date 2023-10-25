@@ -42,13 +42,3 @@ class ExpenseShare(models.Model):
 
     def __str__(self):
         return f"{self.expense.paid_by.name} owes {self.amount} to {self.owed_to}"
-
-
-class SimplfyAmount(models.Model):
-    payer = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="payer_on_behalf"
-    )
-    on_behalf_of = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="on_behalf_of"
-    )
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
