@@ -163,7 +163,7 @@ CELERY_TIMEZONE = "UTC"
 # Schedule celery task to run Sunday midnight every week
 CELERY_BEAT_SCHEDULE = {
     "send-weekly-reminder-email": {
-        "task": "expenses.tasks.send_weekly_reminder_email",
+        "task": "split_balance_app.tasks.send_weekly_reminder_email",
         # "schedule": crontab(minute=1)
         'schedule': crontab(day_of_week=6, hour=0, minute=0),  # Sunday at midnight
     },
