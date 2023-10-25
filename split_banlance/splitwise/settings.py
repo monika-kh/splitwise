@@ -131,6 +131,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+AUTH_USER_MODEL = 'split_balance_app.User'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
@@ -142,9 +143,8 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-
+# Sending email settings
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-# Sending mail form this email settings
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
@@ -160,7 +160,7 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "UTC"
 
-
+# Schedule celery task to run Sunday midnight every week
 CELERY_BEAT_SCHEDULE = {
     "send-weekly-reminder-email": {
         "task": "expenses.tasks.send_weekly_reminder_email",

@@ -16,6 +16,8 @@ def send_email_task(subject, message, from_email, recipient_list):
 
 @shared_task
 def send_weekly_reminder_email():
+    '''
+    Function to send email  at the end of each week. '''
     from django.db.models import Sum
 
     from .models import ExpenseShare, User
@@ -25,12 +27,12 @@ def send_weekly_reminder_email():
     for user in users:
         total_amount_to_pay = (
             ExpenseShare.objects.filter(owed_to=4)
-            .values("payer__name")
+            .values("expense__paid_by__name")
             .annotate(amount_to_pay=Sum("amount"))
         )
         expenses_owe = sum(item["amount_to_pay"] for item in total_amount_to_pay)
         total_amount_to_receive = (
-            ExpenseShare.objects.filter(payer=user)
+            ExpenseShare.objects.filter(expense__paid_by=user)
             .values("owed_to__name")
             .annotate(amount_to_pay=Sum("amount"))
         )
@@ -43,7 +45,7 @@ def send_weekly_reminder_email():
         if total_amount_to_pay:
             message += "Expenses you owe:\n"
             for expense in total_amount_to_pay:
-                message += f"- {expense['amount_to_pay']} to {expense['payer__name']}\n"
+                message += f"- {expense['amount_to_pay']} to {expense['expense__paid_by__name']}\n"
                 message += f"- Total amount to pay:- {expenses_owe} \n"
 
         if total_amount_to_receive:
