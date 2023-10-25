@@ -4,9 +4,9 @@ import os
 
 from celery import Celery
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "split_balance.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "splitwise.settings")
 
-app = Celery("split_balance")
+app = Celery("splitwise")
 
 
 app.config_from_object("django.conf:settings", namespace="CELERY")

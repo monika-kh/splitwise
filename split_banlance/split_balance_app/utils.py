@@ -7,7 +7,7 @@ from .tasks import send_email_task
 
 
 def send_mail(expense, shares):
-    send_email_task(
+    send_email_task.delay(
         subject=f"Amount to pay for the expense- {expense.description} on date: {expense.created_at.date()}",
         message=f"You have to pay amount {shares.amount} for the expense {shares.expense.description} paid by {shares.expense.paid_by.name}.",
         from_email=settings.EMAIL_HOST_USER,
